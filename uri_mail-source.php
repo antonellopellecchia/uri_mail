@@ -4,6 +4,9 @@ function uri_mail($atts, $thing=NULL) {
         'mail_label' => 'Your email',
         'object_label' => 'Object',
         'message_label' => 'Your message',
+        'send_label' => 'Send',
+        'success_message' => 'I contacted the administrator. Wait for his reply!',
+        'failed_message' => 'I couldn\'t contact the administrator. Wait and try again!',
         ), $atts));
 
   $form = "<form method='post' action='<txp:page_url />'>
@@ -13,7 +16,7 @@ function uri_mail($atts, $thing=NULL) {
              <input type='text' maxlength='100' name='uriObject' /><br />
              <label>$message_label</label><br />
              <textarea cols='58' rows='8' name='uriMessage'></textarea><br />
-             <input type='submit' name='uriSend' value='Send' />
+             <input type='submit' name='uriSend' value='$send_label' />
            </form>";
   if (isset($_POST['uriSend'])) {
     $uriObject = $_POST['uriObject'];
@@ -21,17 +24,18 @@ function uri_mail($atts, $thing=NULL) {
     $uriMessage = $_POST['uriMessage'];
     $uriMessage = uri_format($uriMessage);
     $query = "INSERT INTO uri_messages SET
-                object = '$uriObject',
-                mail = '$uriMail',
-                message = '$uriMessage'
+                object = '".doSlash($uriObject)."',
+                mail = '".doSlash($uriMail)."',
+                message = '".doSlash($uriMessage)."',
+                date = CURDATE()
               ";
-    if (@mysql_query($query)) {
-      $form = "<p>I contacted the administrator. Wait for his reply!</p>";
+    if (@safe_query($query)) {
+      $form = "<p>$success_message</p>";
     } else {
-      $form = "<p>I couldn't contact the administrator. Wait and try again!</p>";
+      $form = "<p>$failed_message</p>";
     }
   }
-  return $form;
+  return parse($form);
 }
 
 if (isset($_POST['uriSend'])) {
@@ -41,7 +45,8 @@ if (isset($_POST['uriSend'])) {
   $query = "INSERT INTO uri_messages SET (
               object = '$uriObject',
               mail = '$uriMail',
-              message = $uriMessage
+              message = $uriMessage,
+              date = CURDATE()
               )";
 }
 
@@ -95,20 +100,22 @@ function uri_mail_list() {
             });
           });
         </script>";
-  mysql_query("CREATE TABLE IF NOT EXISTS uri_messages (
+  safe_query("CREATE TABLE IF NOT EXISTS uri_messages (
                  id INT(10) NOT NULL AUTO_INCREMENT,
                  object TEXT,
                  mail TEXT,
+                 date DATE,
                  message TEXT NOT NULL,
                  PRIMARY KEY (id)
   )");
-  $query = mysql_query("SELECT id, object, mail, message FROM uri_messages ORDER BY id DESC");
+  $query = safe_query("SELECT id, object, mail, date, message FROM uri_messages ORDER BY id DESC");
   echo "<h1>Messages list</h1>";
   echo "<table class='uri-list'>
          <thead>
            <th>Id</th>
            <th>Object</th>
            <th>Mail</th>
+           <th>Date</th>
            <th>Message</th>
          </thead>
        ";
@@ -116,12 +123,14 @@ function uri_mail_list() {
     $id = $row['id'];
     $object = htmlspecialchars($row['object']);
     $mail = htmlspecialchars($row['mail']);
+    $date = $row['date'];
     $message = uri_excerpt($row['message']);
     $message = stripslashes($message);
     echo "<tr>
             <td>$id</td>
             <td>$object</td>
             <td>$mail</td>
+            <td>$date</td>
             <td>$message</td>
             <td class='uri-show-link'>".eLink('uri_mail', 'uri_mail_show', 'uri_id', $id, 'Show')."</td>
           </tr>";
@@ -150,8 +159,8 @@ function uri_mail_show() {
 function uri_mail_delete() {
   pagetop('UriMail - Delete message');
   $uriId = $_GET['uri_id'];
-  $delete = "DELETE FROM uri_messages WHERE id='$uriId'";
-  if (@mysql_query($delete)) {
+  $delete = "DELETE FROM uri_messages WHERE id='".doSlash($uriId)."'";
+  if (@safe_query($delete)) {
     echo "<h1>Message $uriId deleted.</h1>
           <p><a href='?event=uri_mail'>Back</a></p>";
   } else {
@@ -162,8 +171,8 @@ function uri_mail_delete() {
 }
 
 function uri_get_message_by_id($id) {
-  $sql = "SELECT * FROM uri_messages WHERE id='$id'";
-  $query = mysql_query($sql);
+  $sql = "SELECT * FROM uri_messages WHERE id='".doSlash($id)."'";
+  $query = safe_query($sql);
   $message = mysql_fetch_array($query);
   return $message;
 }

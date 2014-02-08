@@ -28,7 +28,7 @@ Tags, i.e.: how to use
 
 The most simple tag is <txp:uri_mail />, that creates a simple form with the three main fields.
 
-Tag parameters, i.e.:how to customize
+Tag parameters, i.e.: how to customize
 -------------------------------------
 
 There are three parameters that let you change the label of the three fields:

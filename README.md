@@ -5,7 +5,7 @@ UriMail or uri_mail is a Textpattern 4.5 plugin.
 It lets you create a contact form in the front-end where visitors of your website can send private messages to the administrator.
 
 
-Compilating
+Compiling
 
 To compile it, you need Textpattern extension ied_plugin_composer:
 1. In the Plugin composer tab, write "uri_mail" in the "name" field and click on "Create new plugin";

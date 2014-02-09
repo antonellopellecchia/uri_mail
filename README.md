@@ -35,6 +35,8 @@ There are three parameters that let you change the label of the three fields:
 * mail_label, that changes the label of the email field; its default value is "Your email".
 * object_label, that changes the label of the object field; its default value is "Object".
 * message_label, that changes the label of the message textarea; its default value is "Your message".
+* send_label, that changes the label of sumit button.
+* success_message/failed_message, that change the success/error response.
 
 Managing the messages
 ---------------------
